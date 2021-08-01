@@ -1,0 +1,67 @@
+---
+title: "reproducible_project1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+library(ggplot2)
+#file.path <- paste0(getwd(),"./reproducible/")
+1. #Code for reading in the dataset and/or processing the data
+data <- read.csv("activity.csv",colClasses = c("integer","Date","integer"))
+2. #Histogram of the total number of steps taken each day
+daily.total.steps <- aggregate(steps~date,data,sum,na.rm = TRUE)
+ggplot(daily.total.steps)+
+  geom_histogram(aes(steps))+
+  labs(title="Histogram of Daily Total Number of Steps")
+3. #Mean and median number of steps taken each day
+daily.mean.steps <- mean(daily.total.steps$steps, na.rm = TRUE)
+daily.median.steps <- median(daily.total.steps$steps, na.rm = TRUE)
+4. #Time series plot of the average number of steps taken
+ggplot(daily.total.steps)+
+  geom_line(aes(x=date,y=steps))+
+  labs(title="Time Series of Avg. Number of Steps Taken")
+5. #The 5-minute interval that, on average, contains the maximum number of steps
+interval.mean.steps <- aggregate(steps~interval,data,mean,na.action = na.omit)
+ggplot(interval.mean.steps)+
+  geom_line(aes(x=interval,y=steps))+
+  labs(title="Time Series of Avg. Number of Steps Taken (x=Time Interval)")
+6. #Code to describe and show a strategy for imputing missing data |
+total.na <- sum(is.na(data$steps))
+data.imputed <- data
+data.imputed$steps[is.na(data$steps)] <- mean(data$steps,na.rm=TRUE)
+  daily.total.steps.imputed <- aggregate(steps~date,data.imputed,sum)
+  daily.mean.steps.imputed <- mean(daily.total.steps.imputed$steps, na.rm = TRUE)
+  daily.median.steps.imputed <- median(daily.total.steps.imputed$steps, na.rm = TRUE)
+7. #Histogram of the total number of steps taken each day after missing values are imputed
+ggplot(daily.total.steps.imputed)+
+  geom_histogram(aes(steps))+
+  labs(title="Histogram of Daily Total Number of Steps (Imputed)")
+8. #Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends
+data$is.weekend <- grepl("S.+",weekdays(data$date))
+weekday.steps <- aggregate(steps~interval+is.weekend,data,mean)
+to_string <- as_labeller(c("Weekdays","Weekends"))
+ggplot(data)+
+  geom_line(aes(x=interval,y=steps))+
+  facet_grid(is.weekend~.,labeller = labeller(to_string))
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
